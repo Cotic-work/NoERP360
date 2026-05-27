@@ -12,6 +12,8 @@ export function Layout({
   onLanguageChange,
   theme,
   onThemeToggle,
+  legacyMode,
+  onLegacyToggle,
   t,
   children,
 }) {
@@ -82,6 +84,7 @@ export function Layout({
               <p className="eyebrow">{t.appName}</p>
               <h2>{t.common.topbarTitle}</h2>
             </div>
+            <span className="f1-help">{t.common.f1Help}</span>
           </div>
 
           <div className="topbar-right">
@@ -103,6 +106,14 @@ export function Layout({
               <span className="theme-toggle-dot" />
               {t.common.nightShift}
             </button>
+            <button
+              type="button"
+              className={`theme-toggle legacy-toggle ${legacyMode ? "active" : ""}`}
+              onClick={onLegacyToggle}
+            >
+              <span className="theme-toggle-dot" />
+              {t.common.legacyMode}
+            </button>
             <button type="button" className="ghost-button">
               {t.common.exportAssumptions}
             </button>
@@ -110,6 +121,7 @@ export function Layout({
         </header>
 
         <main className="content">{children}</main>
+        {legacyMode ? <div className="legacy-status-bar">{t.common.legacyStatusBar}</div> : null}
       </div>
 
       {sidebarOpen ? (

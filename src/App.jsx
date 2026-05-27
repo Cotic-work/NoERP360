@@ -6,6 +6,7 @@ import { translations } from "./i18n";
 
 const LANGUAGE_STORAGE_KEY = "noerp360-language";
 const THEME_STORAGE_KEY = "noerp360-theme";
+const LEGACY_STORAGE_KEY = "noerp360-legacy";
 
 function InsightList({ items }) {
   return (
@@ -241,8 +242,11 @@ function DashboardModule({ t, onNavigate, onOpenExcelMode, onOpenSapModal, onOpe
       <section className="hero-panel hero-dashboard">
         <div className="hero-copy">
           <p className="eyebrow">{t.common.landingPage}</p>
-          <h3>{t.dashboard.heroTitle}</h3>
+          <div className="hero-title-logo-wrap">
+            <img src={logo} alt={t.common.logoAlt} className="hero-title-logo" />
+          </div>
           <p>{t.dashboard.heroText}</p>
+          <p className="legacy-caption">{t.dashboard.legacyCaption}</p>
           <div className="hero-actions">
             <button type="button" className="primary-button" onClick={() => onNavigate("reports")}>
               {t.dashboard.reviewAssumptions}
@@ -675,6 +679,13 @@ export default function App() {
 
     return window.localStorage.getItem(THEME_STORAGE_KEY) || "light";
   });
+  const [legacyMode, setLegacyMode] = useState(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    return window.localStorage.getItem(LEGACY_STORAGE_KEY) === "true";
+  });
   const [loading, setLoading] = useState(false);
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const [excelModeOpen, setExcelModeOpen] = useState(false);
@@ -694,6 +705,11 @@ export default function App() {
     window.localStorage.setItem(THEME_STORAGE_KEY, theme);
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+
+  useEffect(() => {
+    window.localStorage.setItem(LEGACY_STORAGE_KEY, String(legacyMode));
+    document.documentElement.dataset.legacy = legacyMode ? "true" : "false";
+  }, [legacyMode]);
 
   useEffect(() => {
     return () => {
@@ -802,6 +818,8 @@ export default function App() {
         onLanguageChange={setLanguage}
         theme={theme}
         onThemeToggle={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
+        legacyMode={legacyMode}
+        onLegacyToggle={() => setLegacyMode((current) => !current)}
         t={t}
       >
         {renderModule()}

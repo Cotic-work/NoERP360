@@ -15,6 +15,8 @@ export const translations = {
       toggleNavigation: "Preklopi navigacijo",
       language: "Jezik",
       nightShift: "Nočna izmena",
+      legacyMode: "Legacy način",
+      f1Help: "F1 Pomoč",
       logoAlt: "Logotip NoERP 360",
       topbarTitle: "Operativna preglednost brez operativnih podatkov.",
       memoryOnline: "Pomnilniški pogon je aktiven.",
@@ -27,6 +29,7 @@ export const translations = {
         "Preverjam, kdo ve pravo stanje…",
         "Odpiram Excel v ozadju…",
       ],
+      legacyStatusBar: "Pripravljeno | Excel povezan | Makri omogočeni | Jože dosegljiv",
     },
     modules: {
       dashboard: "Nadzorna plošča",
@@ -104,6 +107,7 @@ export const translations = {
       utilitiesSubtitle: "Ko digitalizacija začne delovati preveč digitalno.",
       utilitiesText:
         "Za zahtevnejše situacije lahko sistem preklopi na skupni Excel ali poskusi formalno neuspešno sinhronizacijo s SAP.",
+      legacyCaption: "Združljivo z načinom dela iz leta 2003.",
     },
     assistant: {
       button: "AI pomočnik",
@@ -390,6 +394,8 @@ export const translations = {
       toggleNavigation: "Toggle navigation",
       language: "Language",
       nightShift: "Night shift",
+      legacyMode: "Legacy mode",
+      f1Help: "F1 Help",
       logoAlt: "NoERP 360 logo",
       topbarTitle: "Operational Visibility Without Operational Data.",
       memoryOnline: "Memory engine online.",
@@ -402,6 +408,7 @@ export const translations = {
         "Checking who knows the real status…",
         "Opening Excel in the background…",
       ],
+      legacyStatusBar: "Ready | Excel connected | Macros enabled | Jože reachable",
     },
     modules: {
       dashboard: "Dashboard",
@@ -479,6 +486,7 @@ export const translations = {
       utilitiesSubtitle: "For moments when digitization becomes uncomfortably digital.",
       utilitiesText:
         "For more demanding situations, the system can switch to the shared Excel file or attempt a formally unsuccessful SAP synchronization.",
+      legacyCaption: "Compatible with the 2003 way of working.",
     },
     assistant: {
       button: "AI assistant",
