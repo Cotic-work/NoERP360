@@ -3,6 +3,7 @@ import logo from "../logo/NoERP360.png";
 import { Layout } from "./components/Layout";
 import { Badge, Card, SectionHeader, Table, Toggle } from "./components/UI";
 import { translations } from "./i18n";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 const LANGUAGE_STORAGE_KEY = "noerp360-language";
 const THEME_STORAGE_KEY = "noerp360-theme";
@@ -826,6 +827,8 @@ export default function App() {
       </Layout>
 
       <FloatingAssistant t={t} />
+
+      <SpeedInsights />
 
       {loading ? <LoadingOverlay message={t.common.loadingMessages[loadingMessageIndex]} /> : null}
 
