@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import logo from "../logo/NoERP360.png";
 import { Layout } from "./components/Layout";
 import { Badge, Card, SectionHeader, Table, Toggle } from "./components/UI";
 import { translations } from "./i18n";
 
 const LANGUAGE_STORAGE_KEY = "noerp360-language";
+const THEME_STORAGE_KEY = "noerp360-theme";
 
 function InsightList({ items }) {
   return (
@@ -29,7 +30,122 @@ function FeatureCards({ items }) {
   );
 }
 
-function DashboardModule({ t, onNavigate }) {
+function Modal({ children, fullScreen = false, onClose, closeLabel }) {
+  return (
+    <div className={`modal-overlay ${fullScreen ? "full-screen" : ""}`} role="dialog" aria-modal="true">
+      <div className={`modal-card ${fullScreen ? "full-screen" : ""}`}>
+        {onClose ? (
+          <button type="button" className="modal-close" onClick={onClose} aria-label={closeLabel}>
+            {closeLabel}
+          </button>
+        ) : null}
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function LoadingOverlay({ message }) {
+  return (
+    <div className="loading-overlay" role="status" aria-live="polite">
+      <div className="loading-card">
+        <div className="loading-spinner" />
+        <strong>{message}</strong>
+      </div>
+    </div>
+  );
+}
+
+function FloatingAssistant({ t }) {
+  const [open, setOpen] = useState(false);
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([]);
+
+  const submitPrompt = (prompt) => {
+    const question = prompt.trim();
+    if (!question) {
+      return;
+    }
+
+    setMessages((current) => [
+      ...current,
+      { role: "user", text: question },
+      { role: "assistant", text: t.assistant.reply },
+    ]);
+    setInput("");
+  };
+
+  return (
+    <div className="assistant-wrap">
+      {open ? (
+        <div className="assistant-panel">
+          <div className="assistant-header">
+            <div>
+              <strong>{t.assistant.title}</strong>
+              <p>{t.assistant.subtitle}</p>
+            </div>
+            <button type="button" className="assistant-close" onClick={() => setOpen(false)}>
+              {t.common.close}
+            </button>
+          </div>
+
+          <div className="assistant-messages">
+            <div className="assistant-message assistant-message-bot">
+              <span>{t.assistant.welcome}</span>
+            </div>
+            {messages.map((message, index) => (
+              <div
+                key={`${message.role}-${index}`}
+                className={`assistant-message ${
+                  message.role === "assistant"
+                    ? "assistant-message-bot"
+                    : "assistant-message-user"
+                }`}
+              >
+                <span>{message.text}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="assistant-suggestions">
+            {t.assistant.suggestions.map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                className="assistant-suggestion"
+                onClick={() => submitPrompt(suggestion)}
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+
+          <div className="assistant-input-row">
+            <input
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              placeholder={t.assistant.placeholder}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  submitPrompt(input);
+                }
+              }}
+            />
+            <button type="button" className="primary-button" onClick={() => submitPrompt(input)}>
+              {t.assistant.send}
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      <button type="button" className="assistant-trigger" onClick={() => setOpen((current) => !current)}>
+        {t.assistant.button}
+      </button>
+    </div>
+  );
+}
+
+function DashboardModule({ t, onNavigate, onOpenExcelMode, onOpenSapModal }) {
   return (
     <div className="module-stack">
       <section className="hero-panel hero-dashboard">
@@ -104,6 +220,35 @@ function DashboardModule({ t, onNavigate }) {
         </Card>
       </div>
 
+      <div className="two-column">
+        <Card title={t.dashboard.utilitiesTitle} subtitle={t.dashboard.utilitiesSubtitle}>
+          <p className="body-copy">{t.dashboard.utilitiesText}</p>
+          <div className="hero-actions">
+            <button type="button" className="primary-button excel-button" onClick={onOpenExcelMode}>
+              {t.dashboard.excelMode}
+            </button>
+            <button type="button" className="ghost-button" onClick={onOpenSapModal}>
+              {t.dashboard.sapSync}
+            </button>
+          </div>
+        </Card>
+        <Card title={t.dashboard.quickTitle} subtitle={t.dashboard.quickSubtitle}>
+          <div className="quick-actions">
+            {t.dashboard.quickActions.map(([title, text, target]) => (
+              <button
+                key={title}
+                type="button"
+                className="action-tile"
+                onClick={() => onNavigate(target)}
+              >
+                <strong>{title}</strong>
+                <span>{text}</span>
+              </button>
+            ))}
+          </div>
+        </Card>
+      </div>
+
       <div className="three-column">
         <Card title={t.dashboard.activityTitle} subtitle={t.dashboard.activitySubtitle}>
           <ul className="activity-list">
@@ -136,18 +281,12 @@ function DashboardModule({ t, onNavigate }) {
           </div>
         </Card>
 
-        <Card title={t.dashboard.quickTitle} subtitle={t.dashboard.quickSubtitle}>
-          <div className="quick-actions">
-            {t.dashboard.quickActions.map(([title, text, target]) => (
-              <button
-                key={title}
-                type="button"
-                className="action-tile"
-                onClick={() => onNavigate(target)}
-              >
-                <strong>{title}</strong>
-                <span>{text}</span>
-              </button>
+        <Card title={t.assistant.title} subtitle={t.assistant.reply}>
+          <div className="inline-badges multi-line">
+            {t.assistant.suggestions.map((suggestion) => (
+              <Badge key={suggestion} tone="info">
+                {suggestion}
+              </Badge>
             ))}
           </div>
         </Card>
@@ -422,6 +561,10 @@ function SettingsModule({ t }) {
 }
 
 export default function App() {
+  const loadingTimeoutRef = useRef(null);
+  const loadingIntervalRef = useRef(null);
+  const excelIntervalRef = useRef(null);
+
   const [activeModule, setActiveModule] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [language, setLanguage] = useState(() => {
@@ -432,17 +575,87 @@ export default function App() {
     const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
     return stored && translations[stored] ? stored : "sl";
   });
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === "undefined") {
+      return "light";
+    }
+
+    return window.localStorage.getItem(THEME_STORAGE_KEY) || "light";
+  });
+  const [loading, setLoading] = useState(false);
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+  const [excelModeOpen, setExcelModeOpen] = useState(false);
+  const [excelMessageIndex, setExcelMessageIndex] = useState(0);
+  const [sapModalOpen, setSapModalOpen] = useState(false);
+
+  const t = translations[language];
 
   useEffect(() => {
     window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
   }, [language]);
 
-  const t = translations[language];
+  useEffect(() => {
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(loadingTimeoutRef.current);
+      window.clearInterval(loadingIntervalRef.current);
+      window.clearInterval(excelIntervalRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!excelModeOpen) {
+      window.clearInterval(excelIntervalRef.current);
+      setExcelMessageIndex(0);
+      return undefined;
+    }
+
+    excelIntervalRef.current = window.setInterval(() => {
+      setExcelMessageIndex((current) => (current + 1) % t.excel.messages.length);
+    }, 1100);
+
+    return () => window.clearInterval(excelIntervalRef.current);
+  }, [excelModeOpen, t.excel.messages.length]);
+
+  const handleModuleChange = (nextModule) => {
+    if (nextModule === activeModule) {
+      setSidebarOpen(false);
+      return;
+    }
+
+    window.clearTimeout(loadingTimeoutRef.current);
+    window.clearInterval(loadingIntervalRef.current);
+
+    setSidebarOpen(false);
+    setLoading(true);
+    setLoadingMessageIndex(0);
+
+    loadingIntervalRef.current = window.setInterval(() => {
+      setLoadingMessageIndex((current) => (current + 1) % t.common.loadingMessages.length);
+    }, 220);
+
+    loadingTimeoutRef.current = window.setTimeout(() => {
+      window.clearInterval(loadingIntervalRef.current);
+      setActiveModule(nextModule);
+      setLoading(false);
+    }, 920);
+  };
 
   const renderModule = () => {
     switch (activeModule) {
       case "dashboard":
-        return <DashboardModule t={t} onNavigate={setActiveModule} />;
+        return (
+          <DashboardModule
+            t={t}
+            onNavigate={handleModuleChange}
+            onOpenExcelMode={() => setExcelModeOpen(true)}
+            onOpenSapModal={() => setSapModalOpen(true)}
+          />
+        );
       case "finance":
         return <FinanceModule t={t} />;
       case "purchasing":
@@ -460,21 +673,73 @@ export default function App() {
       case "settings":
         return <SettingsModule t={t} />;
       default:
-        return <DashboardModule t={t} onNavigate={setActiveModule} />;
+        return (
+          <DashboardModule
+            t={t}
+            onNavigate={handleModuleChange}
+            onOpenExcelMode={() => setExcelModeOpen(true)}
+            onOpenSapModal={() => setSapModalOpen(true)}
+          />
+        );
     }
   };
 
   return (
-    <Layout
-      activeModule={activeModule}
-      onSelectModule={setActiveModule}
-      sidebarOpen={sidebarOpen}
-      onToggleSidebar={setSidebarOpen}
-      language={language}
-      onLanguageChange={setLanguage}
-      t={t}
-    >
-      {renderModule()}
-    </Layout>
+    <>
+      <Layout
+        activeModule={activeModule}
+        onSelectModule={handleModuleChange}
+        sidebarOpen={sidebarOpen}
+        onToggleSidebar={setSidebarOpen}
+        language={language}
+        onLanguageChange={setLanguage}
+        theme={theme}
+        onThemeToggle={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
+        t={t}
+      >
+        {renderModule()}
+      </Layout>
+
+      <FloatingAssistant t={t} />
+
+      {loading ? <LoadingOverlay message={t.common.loadingMessages[loadingMessageIndex]} /> : null}
+
+      {excelModeOpen ? (
+        <Modal fullScreen onClose={() => setExcelModeOpen(false)} closeLabel={t.excel.back}>
+          <div className="excel-mode">
+            <strong>{t.excel.title}</strong>
+            <div className="excel-loading-list">
+              {t.excel.messages.map((message, index) => (
+                <div
+                  key={message}
+                  className={`excel-loading-item ${index === excelMessageIndex ? "active" : ""}`}
+                >
+                  <span className="loading-spinner small" />
+                  <span>{message}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Modal>
+      ) : null}
+
+      {sapModalOpen ? (
+        <Modal onClose={() => setSapModalOpen(false)} closeLabel={t.sap.close}>
+          <div className="sap-modal">
+            <span className="badge warning">SAP</span>
+            <strong>{t.sap.title}</strong>
+            <p>{t.sap.subtitle}</p>
+            <div className="sap-error-list">
+              {t.sap.errors.map((error, index) => (
+                <div key={error} className="sap-error-row">
+                  <span>0{index + 1}</span>
+                  <strong>{error}</strong>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Modal>
+      ) : null}
+    </>
   );
 }

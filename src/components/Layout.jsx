@@ -10,6 +10,8 @@ export function Layout({
   onToggleSidebar,
   language,
   onLanguageChange,
+  theme,
+  onThemeToggle,
   t,
   children,
 }) {
@@ -97,6 +99,10 @@ export function Layout({
                 ))}
               </select>
             </label>
+            <button type="button" className={`theme-toggle ${theme === "dark" ? "active" : ""}`} onClick={onThemeToggle}>
+              <span className="theme-toggle-dot" />
+              {t.common.nightShift}
+            </button>
             <button type="button" className="ghost-button">
               {t.common.exportAssumptions}
             </button>
