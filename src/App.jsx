@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import logo from "../logo/NoERP360.png";
 import { Layout } from "./components/Layout";
 import { Badge, Card, SectionHeader, Table, Toggle } from "./components/UI";
@@ -876,6 +877,8 @@ export default function App() {
       ) : null}
 
       {toastMessage ? <Toast message={toastMessage} /> : null}
+
+      <Analytics />
     </>
   );
 }
