@@ -56,6 +56,14 @@ function LoadingOverlay({ message }) {
   );
 }
 
+function Toast({ message }) {
+  return (
+    <div className="toast" role="status" aria-live="polite">
+      {message}
+    </div>
+  );
+}
+
 function FloatingAssistant({ t }) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
@@ -145,7 +153,89 @@ function FloatingAssistant({ t }) {
   );
 }
 
-function DashboardModule({ t, onNavigate, onOpenExcelMode, onOpenSapModal }) {
+function AuditReportModal({ t, onClose, onExport, onSend }) {
+  return (
+    <Modal onClose={onClose} closeLabel={t.audit.close}>
+      <div className="report-modal">
+        <div className="report-header">
+          <div>
+            <span className="badge info">NoERP 360</span>
+            <strong>{t.audit.title}</strong>
+            <p>{t.audit.subtitle}</p>
+          </div>
+          <div className="report-actions">
+            <button type="button" className="ghost-button" onClick={onExport}>
+              {t.audit.export}
+            </button>
+            <button type="button" className="primary-button" onClick={onSend}>
+              {t.audit.send}
+            </button>
+          </div>
+        </div>
+
+        <div className="report-grid">
+          <section className="report-section report-section-wide">
+            <span className="report-label">{t.audit.executiveTitle}</span>
+            <p>{t.audit.executiveText}</p>
+          </section>
+
+          <section className="report-section">
+            <span className="report-label">{t.audit.statusTitle}</span>
+            <div className="report-status-list">
+              {t.audit.statusItems.map(([label, value]) => (
+                <div key={label} className="report-status-row">
+                  <span>{label}</span>
+                  <strong>{value}</strong>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="report-section report-section-wide">
+            <span className="report-label">{t.audit.riskTitle}</span>
+            <Table
+              columns={t.audit.riskColumns.map((label, index) => ({
+                key: ["risk", "severity", "mitigation"][index],
+                label,
+              }))}
+              rows={t.audit.riskRows.map(([risk, severity, mitigation]) => ({
+                risk,
+                severity,
+                mitigation,
+              }))}
+            />
+          </section>
+
+          <section className="report-section">
+            <span className="report-label">{t.audit.findingsTitle}</span>
+            <ul className="report-bullet-list">
+              {t.audit.findings.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="report-section">
+            <span className="report-label">{t.audit.recommendationTitle}</span>
+            <ul className="report-bullet-list">
+              {t.audit.recommendations.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </section>
+        </div>
+
+        <div className="report-footer">
+          <button type="button" className="ghost-button" onClick={onClose}>
+            {t.audit.close}
+          </button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+function DashboardModule({ t, onNavigate, onOpenExcelMode, onOpenSapModal, onOpenAuditReport }) {
   return (
     <div className="module-stack">
       <section className="hero-panel hero-dashboard">
@@ -156,6 +246,9 @@ function DashboardModule({ t, onNavigate, onOpenExcelMode, onOpenSapModal }) {
           <div className="hero-actions">
             <button type="button" className="primary-button" onClick={() => onNavigate("reports")}>
               {t.dashboard.reviewAssumptions}
+            </button>
+            <button type="button" className="ghost-button" onClick={onOpenAuditReport}>
+              {t.dashboard.managementReport}
             </button>
             <button type="button" className="ghost-button" onClick={() => onNavigate("supply")}>
               {t.dashboard.openBacklog}
@@ -587,6 +680,9 @@ export default function App() {
   const [excelModeOpen, setExcelModeOpen] = useState(false);
   const [excelMessageIndex, setExcelMessageIndex] = useState(0);
   const [sapModalOpen, setSapModalOpen] = useState(false);
+  const [auditModalOpen, setAuditModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const toastTimeoutRef = useRef(null);
 
   const t = translations[language];
 
@@ -604,6 +700,7 @@ export default function App() {
       window.clearTimeout(loadingTimeoutRef.current);
       window.clearInterval(loadingIntervalRef.current);
       window.clearInterval(excelIntervalRef.current);
+      window.clearTimeout(toastTimeoutRef.current);
     };
   }, []);
 
@@ -645,6 +742,14 @@ export default function App() {
     }, 920);
   };
 
+  const showToast = (message) => {
+    window.clearTimeout(toastTimeoutRef.current);
+    setToastMessage(message);
+    toastTimeoutRef.current = window.setTimeout(() => {
+      setToastMessage("");
+    }, 2600);
+  };
+
   const renderModule = () => {
     switch (activeModule) {
       case "dashboard":
@@ -654,6 +759,7 @@ export default function App() {
             onNavigate={handleModuleChange}
             onOpenExcelMode={() => setExcelModeOpen(true)}
             onOpenSapModal={() => setSapModalOpen(true)}
+            onOpenAuditReport={() => setAuditModalOpen(true)}
           />
         );
       case "finance":
@@ -679,6 +785,7 @@ export default function App() {
             onNavigate={handleModuleChange}
             onOpenExcelMode={() => setExcelModeOpen(true)}
             onOpenSapModal={() => setSapModalOpen(true)}
+            onOpenAuditReport={() => setAuditModalOpen(true)}
           />
         );
     }
@@ -740,6 +847,17 @@ export default function App() {
           </div>
         </Modal>
       ) : null}
+
+      {auditModalOpen ? (
+        <AuditReportModal
+          t={t}
+          onClose={() => setAuditModalOpen(false)}
+          onExport={() => showToast(t.audit.exportToast)}
+          onSend={() => showToast(t.audit.sendToast)}
+        />
+      ) : null}
+
+      {toastMessage ? <Toast message={toastMessage} /> : null}
     </>
   );
 }
