@@ -1,12 +1,16 @@
 import { useEffect } from "react";
 import logo from "../../logo/NoERP360.png";
-import { modules } from "../data/modules";
+import { languages } from "../i18n";
+import { moduleIcons } from "../data/modules";
 
 export function Layout({
   activeModule,
   onSelectModule,
   sidebarOpen,
   onToggleSidebar,
+  language,
+  onLanguageChange,
+  t,
   children,
 }) {
   useEffect(() => {
@@ -25,16 +29,16 @@ export function Layout({
       <aside className={`sidebar ${sidebarOpen ? "is-open" : ""}`}>
         <div className="brand-block">
           <div className="brand-logo-shell">
-            <img src={logo} alt="NoERP 360 logo" className="brand-logo" />
+            <img src={logo} alt={t.common.logoAlt} className="brand-logo" />
           </div>
           <div>
-            <p className="eyebrow">Enterprise Memory Platform</p>
-            <h1>NoERP 360</h1>
+            <p className="eyebrow">{t.dashboard.memoryEngine}</p>
+            <h1>{t.appName}</h1>
           </div>
         </div>
 
-        <nav className="nav-list" aria-label="Application modules">
-          {modules.map((module) => (
+        <nav className="nav-list" aria-label={t.common.module}>
+          {moduleIcons.map((module) => (
             <button
               key={module.id}
               type="button"
@@ -45,14 +49,14 @@ export function Layout({
               }}
             >
               <span className="nav-icon">{module.icon}</span>
-              <span>{module.label}</span>
+              <span>{t.modules[module.id]}</span>
             </button>
           ))}
         </nav>
 
         <div className="sidebar-card">
-          <span className="badge neutral">Compliance Snapshot</span>
-          <p>Documentation maturity remains fully dependent on verbal tradition.</p>
+          <span className="badge neutral">{t.common.complianceSnapshot}</span>
+          <p>{t.common.complianceText}</p>
         </div>
       </aside>
 
@@ -63,28 +67,38 @@ export function Layout({
               type="button"
               className="menu-button"
               onClick={() => onToggleSidebar(!sidebarOpen)}
-              aria-label="Toggle navigation"
+              aria-label={t.common.toggleNavigation}
             >
               <span />
               <span />
               <span />
             </button>
             <div className="topbar-logo-shell">
-              <img src={logo} alt="NoERP 360" className="topbar-logo" />
+              <img src={logo} alt={t.common.logoAlt} className="topbar-logo" />
             </div>
             <div>
-              <p className="eyebrow">NoERP 360</p>
-              <h2>Operational Visibility Without Operational Data</h2>
+              <p className="eyebrow">{t.appName}</p>
+              <h2>{t.common.topbarTitle}</h2>
             </div>
           </div>
 
           <div className="topbar-right">
             <div className="topbar-status">
               <span className="status-dot" />
-              Memory engine online
+              {t.common.memoryOnline}
             </div>
+            <label className="language-switcher">
+              <span>{t.common.language}</span>
+              <select value={language} onChange={(event) => onLanguageChange(event.target.value)}>
+                {languages.map((item) => (
+                  <option key={item.code} value={item.code}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </label>
             <button type="button" className="ghost-button">
-              Export assumptions
+              {t.common.exportAssumptions}
             </button>
           </div>
         </header>
@@ -97,7 +111,7 @@ export function Layout({
           type="button"
           className="sidebar-overlay"
           onClick={() => onToggleSidebar(false)}
-          aria-label="Close navigation"
+          aria-label={t.common.closeNavigation}
         />
       ) : null}
     </div>

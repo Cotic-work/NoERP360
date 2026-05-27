@@ -1,34 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import logo from "../logo/NoERP360.png";
 import { Layout } from "./components/Layout";
 import { Badge, Card, SectionHeader, Table, Toggle } from "./components/UI";
-import {
-  activityFeed,
-  commandCenterStats,
-  commercialPipeline,
-  dashboardKpis,
-  financeCards,
-  financeExceptions,
-  financeTable,
-  moduleSpotlights,
-  productionFeatures,
-  productionOrders,
-  productionSignals,
-  purchasingFeatures,
-  reportCards,
-  reportLibrary,
-  salesFeatures,
-  salesQuotes,
-  settingsPolicies,
-  settingsToggles,
-  supplierMemory,
-  supplyEscalations,
-  supplyFeatures,
-  supplyWorkflow,
-  warehouseBadges,
-  warehouseFeatures,
-  warehouseLocations,
-  warehouseNotes,
-} from "./data/modules";
+import { translations } from "./i18n";
+
+const LANGUAGE_STORAGE_KEY = "noerp360-language";
 
 function InsightList({ items }) {
   return (
@@ -46,148 +22,133 @@ function InsightList({ items }) {
 function FeatureCards({ items }) {
   return (
     <div className="feature-grid">
-      {items.map((item) => {
-        const title = Array.isArray(item) ? item[0] : item.title;
-        const subtitle = Array.isArray(item) ? item[1] : item.subtitle;
-        return <Card key={title} title={title} subtitle={subtitle} />;
-      })}
+      {items.map(([title, subtitle]) => (
+        <Card key={title} title={title} subtitle={subtitle} />
+      ))}
     </div>
   );
 }
 
-function DashboardModule({ onNavigate }) {
+function DashboardModule({ t, onNavigate }) {
   return (
     <div className="module-stack">
       <section className="hero-panel hero-dashboard">
         <div className="hero-copy">
-          <p className="eyebrow">Landing Page</p>
-          <h3>Enterprise coordination for teams who prefer memory over master data.</h3>
-          <p>
-            NoERP 360 presents a confident operating picture for businesses that
-            still rely on instinct, undocumented know-how, and the way things
-            have always been done. It looks fully digital, while preserving the
-            cultural comfort of not entering anything.
-          </p>
+          <p className="eyebrow">{t.common.landingPage}</p>
+          <h3>{t.dashboard.heroTitle}</h3>
+          <p>{t.dashboard.heroText}</p>
           <div className="hero-actions">
             <button type="button" className="primary-button" onClick={() => onNavigate("reports")}>
-              Review assumptions
+              {t.dashboard.reviewAssumptions}
             </button>
             <button type="button" className="ghost-button" onClick={() => onNavigate("supply")}>
-              Open verbal backlog
+              {t.dashboard.openBacklog}
             </button>
           </div>
         </div>
 
-        <div className="hero-panel-grid">
-          <div className="signal-card">
-            <span className="badge info">Real-time</span>
-            <strong>Memory Engine</strong>
-            <p>
-              Synchronizes operations through instinct, corridor updates, and
-              selective recollection with no transactional burden.
-            </p>
+        <div className="hero-visual">
+          <div className="hero-logo-card">
+            <div className="hero-logo-shell">
+              <img src={logo} alt={t.common.logoAlt} className="hero-logo" />
+            </div>
+            <div className="hero-logo-copy">
+              <span className="badge info">{t.dashboard.realtime}</span>
+              <strong>{t.dashboard.memoryEngine}</strong>
+              <p>{t.dashboard.memoryEngineText}</p>
+            </div>
           </div>
-          <div className="hero-mini-card">
-            <span>Operational confidence</span>
-            <strong>94%</strong>
-            <p>Evidence remains under discussion.</p>
-          </div>
-          <div className="hero-mini-card">
-            <span>Data entry resistance</span>
-            <strong>Structural</strong>
-            <p>Process discipline remains culturally optional.</p>
+
+          <div className="hero-panel-grid">
+            <div className="hero-mini-card">
+              <span>{t.dashboard.operationalConfidence}</span>
+              <strong>94%</strong>
+              <p>{t.dashboard.evidencePending}</p>
+            </div>
+            <div className="hero-mini-card">
+              <span>{t.dashboard.entryResistance}</span>
+              <strong>{t.dashboard.structural}</strong>
+              <p>{t.dashboard.processOptional}</p>
+            </div>
           </div>
         </div>
       </section>
 
       <div className="card-grid kpi-grid">
-        {dashboardKpis.map((item) => (
-          <Card
-            key={item.title}
-            title={item.title}
-            value={item.value}
-            subtitle={item.meta}
-            tone={item.tone}
-          />
+        {t.dashboard.kpis.map(([title, value, meta, tone]) => (
+          <Card key={title} title={title} value={value} subtitle={meta} tone={tone} />
         ))}
       </div>
 
       <div className="command-center">
-        <Card
-          title="Operational Command Center"
-          subtitle="A realistic landing page for perfectly unrealistic data discipline."
-        >
+        <Card title={t.dashboard.commandCenterTitle} subtitle={t.dashboard.commandCenterSubtitle}>
           <div className="command-grid">
-            {commandCenterStats.map((item) => (
-              <div className="command-stat" key={item.label}>
-                <span>{item.label}</span>
-                <strong>{item.value}</strong>
-                <p>{item.caption}</p>
+            {t.dashboard.commandStats.map(([label, value, caption]) => (
+              <div className="command-stat" key={label}>
+                <span>{label}</span>
+                <strong>{value}</strong>
+                <p>{caption}</p>
               </div>
             ))}
           </div>
         </Card>
-        <Card title="Real-time Memory Engine" subtitle="Human knowledge remains the official system of record.">
-          <p className="body-copy">
-            Instead of burdening staff with structured transactions, NoERP 360
-            leverages shared memory, implied process steps, and socially
-            validated stock levels. The result is flexible, immediate, and
-            impossible to reconcile.
-          </p>
+        <Card title={t.dashboard.memoryEngine} subtitle={t.dashboard.memoryCardSubtitle}>
+          <p className="body-copy">{t.dashboard.memoryCardText}</p>
           <div className="inline-badges">
-            <Badge tone="info">No barcode required</Badge>
-            <Badge tone="warning">Excel-assisted intelligence</Badge>
-            <Badge tone="neutral">Audit-resistant by design</Badge>
+            {t.dashboard.memoryBadges.map((badge, index) => (
+              <Badge key={badge} tone={index === 1 ? "warning" : index === 2 ? "neutral" : "info"}>
+                {badge}
+              </Badge>
+            ))}
           </div>
         </Card>
       </div>
 
       <div className="three-column">
-        <Card title="Live Activity Feed" subtitle="Latest operational assumptions across the enterprise.">
+        <Card title={t.dashboard.activityTitle} subtitle={t.dashboard.activitySubtitle}>
           <ul className="activity-list">
-            {activityFeed.map((entry) => (
-              <li key={`${entry.time}-${entry.event}`}>
-                <span className={`timeline-dot tone-${entry.tone}`} />
+            {t.dashboard.activityFeed.map(([time, team, event, tone]) => (
+              <li key={`${time}-${event}`}>
+                <span className={`timeline-dot tone-${tone}`} />
                 <div>
                   <div className="activity-meta">
-                    <strong>{entry.team}</strong>
-                    <span>{entry.time}</span>
+                    <strong>{team}</strong>
+                    <span>{time}</span>
                   </div>
-                  <span>{entry.event}</span>
+                  <span>{event}</span>
                 </div>
               </li>
             ))}
           </ul>
         </Card>
 
-        <Card title="Module Spotlights" subtitle="Cross-functional status without the inconvenience of updates.">
+        <Card title={t.dashboard.spotlightTitle} subtitle={t.dashboard.spotlightSubtitle}>
           <div className="spotlight-list">
-            {moduleSpotlights.map((item) => (
-              <div className="spotlight-row" key={item.module}>
+            {t.dashboard.spotlights.map(([module, status, note]) => (
+              <div className="spotlight-row" key={module}>
                 <div>
-                  <strong>{item.module}</strong>
-                  <p>{item.note}</p>
+                  <strong>{module}</strong>
+                  <p>{note}</p>
                 </div>
-                <Badge tone="neutral">{item.status}</Badge>
+                <Badge tone="neutral">{status}</Badge>
               </div>
             ))}
           </div>
         </Card>
 
-        <Card title="Quick Actions" subtitle="Things a serious ERP would usually let you do.">
+        <Card title={t.dashboard.quickTitle} subtitle={t.dashboard.quickSubtitle}>
           <div className="quick-actions">
-            <button type="button" className="action-tile" onClick={() => onNavigate("sales")}>
-              <strong>Create verbal order</strong>
-              <span>Capture demand without typing anything.</span>
-            </button>
-            <button type="button" className="action-tile" onClick={() => onNavigate("warehouse")}>
-              <strong>Locate theoretical stock</strong>
-              <span>Ask the warehouse with modern visual support.</span>
-            </button>
-            <button type="button" className="action-tile" onClick={() => onNavigate("finance")}>
-              <strong>Close the month emotionally</strong>
-              <span>Prepare an explanation before the numbers exist.</span>
-            </button>
+            {t.dashboard.quickActions.map(([title, text, target]) => (
+              <button
+                key={title}
+                type="button"
+                className="action-tile"
+                onClick={() => onNavigate(target)}
+              >
+                <strong>{title}</strong>
+                <span>{text}</span>
+              </button>
+            ))}
           </div>
         </Card>
       </div>
@@ -195,84 +156,76 @@ function DashboardModule({ onNavigate }) {
   );
 }
 
-function FinanceModule() {
+function FinanceModule({ t }) {
   return (
     <div className="module-stack">
-      <SectionHeader
-        title="Finance & Accounting"
-        subtitle="We know approximately how much we have."
-      />
-      <div className="banner warning-banner">
-        No discrepancies detected because no data exists.
-      </div>
+      <SectionHeader eyebrow={t.common.module} title={t.finance.title} subtitle={t.finance.subtitle} />
+      <div className="banner warning-banner">{t.finance.banner}</div>
       <div className="card-grid">
-        {financeCards.map(([title, value]) => (
+        {t.finance.cards.map(([title, value]) => (
           <Card key={title} title={title} value={value} />
         ))}
       </div>
       <div className="two-column">
-        <Card title="Financial Visibility" subtitle="The books remain conceptually balanced.">
+        <Card title={t.finance.visibilityTitle} subtitle={t.finance.visibilitySubtitle}>
           <Table
-            columns={[
-              { key: "period", label: "Period" },
-              { key: "account", label: "Account" },
-              { key: "amount", label: "Amount" },
-              { key: "status", label: "Status" },
-              { key: "owner", label: "Source" },
-            ]}
-            rows={financeTable}
+            columns={t.finance.columns.map((label, index) => ({
+              key: ["period", "account", "amount", "status", "owner"][index],
+              label,
+            }))}
+            rows={t.finance.rows.map(([period, account, amount, status, owner]) => ({
+              period,
+              account,
+              amount,
+              status,
+              owner,
+            }))}
           />
         </Card>
-        <Card title="Exception Monitor" subtitle="Key areas currently held together by optimism.">
-          <InsightList items={financeExceptions} />
+        <Card title={t.finance.exceptionsTitle} subtitle={t.finance.exceptionsSubtitle}>
+          <InsightList items={t.finance.exceptions} />
         </Card>
       </div>
     </div>
   );
 }
 
-function PurchasingModule() {
+function PurchasingModule({ t }) {
   const [message, setMessage] = useState("");
 
   return (
     <div className="module-stack">
       <SectionHeader
-        title="Purchasing"
-        subtitle="When it runs out, call the supplier."
+        eyebrow={t.common.module}
+        title={t.purchasing.title}
+        subtitle={t.purchasing.subtitle}
         action={
-          <button
-            type="button"
-            className="primary-button"
-            onClick={() =>
-              setMessage("Purchase order not created, but everyone feels informed.")
-            }
-          >
-            Generate purchase order from memory
+          <button type="button" className="primary-button" onClick={() => setMessage(t.purchasing.success)}>
+            {t.purchasing.generate}
           </button>
         }
       />
       {message ? <div className="banner success-banner">{message}</div> : null}
-      <FeatureCards items={purchasingFeatures} />
+      <FeatureCards items={t.purchasing.features} />
       <div className="two-column">
-        <Card title="Supplier Memory Register" subtitle="Supplier knowledge remains decentralized but passionate.">
+        <Card title={t.purchasing.supplierTitle} subtitle={t.purchasing.supplierSubtitle}>
           <Table
-            columns={[
-              { key: "supplier", label: "Supplier" },
-              { key: "buyer", label: "Buyer" },
-              { key: "lastPrice", label: "Last Price" },
-              { key: "leadTime", label: "Lead Time" },
-            ]}
-            rows={supplierMemory}
+            columns={t.purchasing.columns.map((label, index) => ({
+              key: ["supplier", "buyer", "lastPrice", "leadTime"][index],
+              label,
+            }))}
+            rows={t.purchasing.rows.map(([supplier, buyer, lastPrice, leadTime]) => ({
+              supplier,
+              buyer,
+              lastPrice,
+              leadTime,
+            }))}
           />
         </Card>
-        <Card title="Purchasing Empty State" subtitle="Structured procurement remains aspirational.">
+        <Card title={t.purchasing.emptyTitle} subtitle={t.purchasing.emptySubtitle}>
           <div className="empty-state">
-            <strong>No approved purchase orders found.</strong>
-            <p>
-              Procurement currently operates through remembered agreements,
-              repeat phone calls, and a strong belief that the supplier knows
-              what was meant.
-            </p>
+            <strong>{t.purchasing.emptyStrong}</strong>
+            <p>{t.purchasing.emptyText}</p>
           </div>
         </Card>
       </div>
@@ -280,152 +233,149 @@ function PurchasingModule() {
   );
 }
 
-function SalesModule() {
+function SalesModule({ t }) {
   return (
     <div className="module-stack">
-      <SectionHeader
-        title="Sales"
-        subtitle="The price depends on the customer and the mood."
-      />
-      <FeatureCards items={salesFeatures} />
+      <SectionHeader eyebrow={t.common.module} title={t.sales.title} subtitle={t.sales.subtitle} />
+      <FeatureCards items={t.sales.features} />
       <div className="two-column">
-        <Card title="Quote Register" subtitle="Commercial precision with flexible specifics.">
+        <Card title={t.sales.quotesTitle} subtitle={t.sales.quotesSubtitle}>
           <Table
-            columns={[
-              { key: "customer", label: "Customer" },
-              { key: "price", label: "Price" },
-              { key: "discount", label: "Discount" },
-              { key: "status", label: "Status" },
-            ]}
-            rows={salesQuotes}
+            columns={t.sales.columns.map((label, index) => ({
+              key: ["customer", "price", "discount", "status"][index],
+              label,
+            }))}
+            rows={t.sales.rows.map(([customer, price, discount, status]) => ({
+              customer,
+              price,
+              discount,
+              status,
+            }))}
           />
         </Card>
-        <Card title="Pipeline Commentary" subtitle="Forecasting remains qualitative and highly confident.">
-          <InsightList items={commercialPipeline} />
+        <Card title={t.sales.pipelineTitle} subtitle={t.sales.pipelineSubtitle}>
+          <InsightList items={t.sales.pipeline} />
         </Card>
       </div>
     </div>
   );
 }
 
-function WarehouseModule() {
+function WarehouseModule({ t }) {
   return (
     <div className="module-stack">
-      <SectionHeader
-        title="Warehouse Management"
-        subtitle="It must be somewhere."
-      />
-      <FeatureCards items={warehouseFeatures} />
+      <SectionHeader eyebrow={t.common.module} title={t.warehouse.title} subtitle={t.warehouse.subtitle} />
+      <FeatureCards items={t.warehouse.features} />
 
       <div className="two-column">
-        <Card title="Warehouse Bin Map" subtitle="Location certainty remains dynamic.">
+        <Card title={t.warehouse.binTitle} subtitle={t.warehouse.binSubtitle}>
           <div className="bin-grid">
-            {warehouseLocations.map((location) => (
-              <div className="bin-card" key={location.code}>
-                <span className="bin-code">Location {location.code}</span>
-                <Badge tone={location.tone}>{location.label}</Badge>
+            {t.warehouse.bins.map(([code, label, tone]) => (
+              <div className="bin-card" key={code}>
+                <span className="bin-code">{t.common.location} {code}</span>
+                <Badge tone={tone}>{label}</Badge>
               </div>
             ))}
           </div>
         </Card>
 
-        <Card title="Availability Signals" subtitle="Operational truth indicators.">
+        <Card title={t.warehouse.availabilityTitle} subtitle={t.warehouse.availabilitySubtitle}>
           <div className="inline-badges multi-line">
-            {warehouseBadges.map((badge) => (
+            {t.warehouse.badges.map((badge) => (
               <Badge key={badge} tone="info">
                 {badge}
               </Badge>
             ))}
           </div>
           <div className="subsection-spacer" />
-          <InsightList items={warehouseNotes} />
+          <InsightList items={t.warehouse.notes} />
         </Card>
       </div>
     </div>
   );
 }
 
-function ProductionModule() {
+function ProductionModule({ t }) {
   return (
     <div className="module-stack">
-      <SectionHeader title="Production" subtitle="Let's just make it." />
-      <FeatureCards items={productionFeatures} />
+      <SectionHeader eyebrow={t.common.module} title={t.production.title} subtitle={t.production.subtitle} />
+      <FeatureCards items={t.production.features} />
       <div className="two-column">
-        <Card title="Production Board" subtitle="Execution visibility with selective certainty.">
+        <Card title={t.production.boardTitle} subtitle={t.production.boardSubtitle}>
           <Table
-            columns={[
-              { key: "workOrder", label: "Work Order" },
-              { key: "materialStatus", label: "Material Status" },
-              { key: "operator", label: "Operator" },
-              { key: "completion", label: "Completion" },
-            ]}
-            rows={productionOrders}
+            columns={t.production.columns.map((label, index) => ({
+              key: ["workOrder", "materialStatus", "operator", "completion"][index],
+              label,
+            }))}
+            rows={t.production.rows.map(([workOrder, materialStatus, operator, completion]) => ({
+              workOrder,
+              materialStatus,
+              operator,
+              completion,
+            }))}
           />
         </Card>
-        <Card title="Shop Floor Signals" subtitle="What the system would know if the system were used.">
-          <InsightList items={productionSignals} />
+        <Card title={t.production.signalsTitle} subtitle={t.production.signalsSubtitle}>
+          <InsightList items={t.production.signals} />
         </Card>
       </div>
     </div>
   );
 }
 
-function SupplyModule() {
+function SupplyModule({ t }) {
   return (
     <div className="module-stack">
-      <SectionHeader
-        title="Production Supply"
-        subtitle="Do we have the material?"
-      />
-      <FeatureCards items={supplyFeatures} />
+      <SectionHeader eyebrow={t.common.module} title={t.supply.title} subtitle={t.supply.subtitle} />
+      <FeatureCards items={t.supply.features} />
       <div className="two-column">
-        <Card title="Material Escalation Workflow" subtitle="Standard operating pattern.">
+        <Card title={t.supply.workflowTitle} subtitle={t.supply.workflowSubtitle}>
           <ol className="workflow-list">
-            {supplyWorkflow.map((step) => (
+            {t.supply.workflow.map((step) => (
               <li key={step}>{step}</li>
             ))}
           </ol>
         </Card>
-        <Card title="Escalation Notes" subtitle="Interdepartmental alignment status.">
-          <InsightList items={supplyEscalations} />
+        <Card title={t.supply.escalationTitle} subtitle={t.supply.escalationSubtitle}>
+          <InsightList items={t.supply.escalations} />
         </Card>
       </div>
     </div>
   );
 }
 
-function ReportsModule() {
+function ReportsModule({ t }) {
   return (
     <div className="module-stack">
-      <SectionHeader
-        title="Reports"
-        subtitle="Accurate reports require accurate data. Good luck."
-      />
+      <SectionHeader eyebrow={t.common.module} title={t.reports.title} subtitle={t.reports.subtitle} />
       <div className="card-grid">
-        {reportCards.map(([title, value]) => (
+        {t.reports.cards.map(([title, value]) => (
           <Card key={title} title={title} value={value} />
         ))}
       </div>
       <div className="two-column">
-        <Card title="Analytics Workspace" subtitle="Chart rendering remains blocked by reality.">
+        <Card title={t.reports.analyticsTitle} subtitle={t.reports.analyticsSubtitle}>
           <div className="empty-chart">
             <div className="empty-chart-grid" />
-            <p>
-              No chart available because nobody entered anything. Executive
-              interpretation may proceed regardless.
-            </p>
+            <p>{t.reports.analyticsEmpty}</p>
           </div>
         </Card>
-        <Card title="Report Library" subtitle="Popular outputs with flexible source quality.">
-          <InsightList items={reportLibrary} />
+        <Card title={t.reports.libraryTitle} subtitle={t.reports.librarySubtitle}>
+          <InsightList items={t.reports.library} />
         </Card>
       </div>
     </div>
   );
 }
 
-function SettingsModule() {
-  const [toggles, setToggles] = useState(settingsToggles);
+function SettingsModule({ t }) {
+  const [toggles, setToggles] = useState([
+    { key: "requireEntry", enabled: false },
+    { key: "discipline", enabled: false },
+    { key: "excel", enabled: true },
+    { key: "joze", enabled: true },
+    { key: "legacy", enabled: true },
+  ]);
   const [saved, setSaved] = useState("");
 
   const flipToggle = (key) => {
@@ -440,34 +390,31 @@ function SettingsModule() {
   return (
     <div className="module-stack">
       <SectionHeader
-        title="Settings"
-        subtitle="Configure the illusion of control."
+        eyebrow={t.common.module}
+        title={t.settings.title}
+        subtitle={t.settings.subtitle}
         action={
-          <button
-            type="button"
-            className="primary-button"
-            onClick={() => setSaved("Nothing saved. Existing ambiguity preserved.")}
-          >
-            Save nothing
+          <button type="button" className="primary-button" onClick={() => setSaved(t.settings.saved)}>
+            {t.settings.save}
           </button>
         }
       />
       {saved ? <div className="banner info-banner">{saved}</div> : null}
       <div className="two-column">
-        <Card title="Behavior Controls" subtitle="System governance aligned with operational culture.">
+        <Card title={t.settings.controlsTitle} subtitle={t.settings.controlsSubtitle}>
           <div className="toggle-list">
-            {toggles.map((toggle) => (
+            {toggles.map((toggle, index) => (
               <Toggle
                 key={toggle.key}
-                label={toggle.label}
+                label={t.settings.toggles[index]}
                 enabled={toggle.enabled}
                 onChange={() => flipToggle(toggle.key)}
               />
             ))}
           </div>
         </Card>
-        <Card title="Policy Preview" subtitle="Formal controls with intentionally limited consequences.">
-          <InsightList items={settingsPolicies} />
+        <Card title={t.settings.policyTitle} subtitle={t.settings.policySubtitle}>
+          <InsightList items={t.settings.policies} />
         </Card>
       </div>
     </div>
@@ -477,29 +424,43 @@ function SettingsModule() {
 export default function App() {
   const [activeModule, setActiveModule] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [language, setLanguage] = useState(() => {
+    if (typeof window === "undefined") {
+      return "sl";
+    }
+
+    const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    return stored && translations[stored] ? stored : "sl";
+  });
+
+  useEffect(() => {
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+  }, [language]);
+
+  const t = translations[language];
 
   const renderModule = () => {
     switch (activeModule) {
       case "dashboard":
-        return <DashboardModule onNavigate={setActiveModule} />;
+        return <DashboardModule t={t} onNavigate={setActiveModule} />;
       case "finance":
-        return <FinanceModule />;
+        return <FinanceModule t={t} />;
       case "purchasing":
-        return <PurchasingModule />;
+        return <PurchasingModule t={t} />;
       case "sales":
-        return <SalesModule />;
+        return <SalesModule t={t} />;
       case "warehouse":
-        return <WarehouseModule />;
+        return <WarehouseModule t={t} />;
       case "production":
-        return <ProductionModule />;
+        return <ProductionModule t={t} />;
       case "supply":
-        return <SupplyModule />;
+        return <SupplyModule t={t} />;
       case "reports":
-        return <ReportsModule />;
+        return <ReportsModule t={t} />;
       case "settings":
-        return <SettingsModule />;
+        return <SettingsModule t={t} />;
       default:
-        return <DashboardModule onNavigate={setActiveModule} />;
+        return <DashboardModule t={t} onNavigate={setActiveModule} />;
     }
   };
 
@@ -509,6 +470,9 @@ export default function App() {
       onSelectModule={setActiveModule}
       sidebarOpen={sidebarOpen}
       onToggleSidebar={setSidebarOpen}
+      language={language}
+      onLanguageChange={setLanguage}
+      t={t}
     >
       {renderModule()}
     </Layout>

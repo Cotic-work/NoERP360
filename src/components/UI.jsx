@@ -1,8 +1,8 @@
-export function SectionHeader({ title, subtitle, action }) {
+export function SectionHeader({ eyebrow = "Module", title, subtitle, action }) {
   return (
     <div className="section-header">
       <div>
-        <p className="eyebrow">Module</p>
+        <p className="eyebrow">{eyebrow}</p>
         <h3>{title}</h3>
         {subtitle ? <p className="section-subtitle">{subtitle}</p> : null}
       </div>
